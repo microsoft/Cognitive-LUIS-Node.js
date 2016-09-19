@@ -93,7 +93,7 @@ var LUISClient = function(initData) {
       text = validateText(text);
       validateLUISresponse(LUISresponse);
       validateResponseHandlers(responseHandlers);
-	  var LUISOptions = {
+      var LUISOptions = {
         hostname: LUISURL,
         path: util.format(LUISReplyMask, LUISPreviewURL, appId, appKey,
           LUISresponse.dialog.contextId, LUISVerboseURL, encodeURIComponent(text))
