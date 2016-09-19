@@ -85,7 +85,7 @@ var LUISClient = function(initData) {
      * @param responseHandlers an object that contains "onSuccess" and "onFailure" functions to be executed
      * on the success or failure of the web request
      */
-    reply: function (text, LUISresponse, responseHandlers) {
+    reply: function (text, LUISresponse, responseHandlers, forceSetParameterName) {
       //TODO: When the reply can be used in the published version this condition has to be removed
       if (!preview) {
         throw new Error('Reply can only be used with the preview version');
@@ -93,11 +93,14 @@ var LUISClient = function(initData) {
       text = validateText(text);
       validateLUISresponse(LUISresponse);
       validateResponseHandlers(responseHandlers);
-      var LUISOptions = {
+	  var LUISOptions = {
         hostname: LUISURL,
         path: util.format(LUISReplyMask, LUISPreviewURL, appId, appKey,
           LUISresponse.dialog.contextId, LUISVerboseURL, encodeURIComponent(text))
       };
+	  if(forceSetParameterName !== null && typeof forceSetParameterName === 'string'){
+	    LUISOptions.path += util.format('&forceset=%s',forceSetParameterName);
+	  }
       httpHelper(LUISOptions, responseHandlers);
     }
   };
