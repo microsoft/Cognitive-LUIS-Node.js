@@ -33,10 +33,12 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-const LUISClient = require('./luis_sdk');
+"use strict";
 
-const APPID = 'Enter your Application Id here';
-const APPKEY = 'Enter your Subscription Key here';
+const LUISClient = require("./luis_sdk");
+
+const APPID = "Enter your Application Id here";
+const APPKEY = "Enter your Subscription Key here";
 
 var LUISclient = LUISClient({
   appId: APPID,
@@ -45,7 +47,7 @@ var LUISclient = LUISClient({
   verbose: true
 });
 
-LUISclient.predict('Enter the text to predict', {
+LUISclient.predict("Enter the text to predict", {
 
   //On success of prediction
   onSuccess: function (response) {
@@ -58,18 +60,18 @@ LUISclient.predict('Enter the text to predict', {
   }
 });
 
-function printOnSuccess(response) {
-  console.log('Query: ' + response.query);
-  console.log('Top Intent: ' + response.topScoringIntent.intent);
-  console.log('Entities:');
+var printOnSuccess = function (response) {
+  console.log("Query: " + response.query);
+  console.log("Top Intent: " + response.topScoringIntent.intent);
+  console.log("Entities:");
   for (var i = 1; i <= response.entities.length; i++) {
-    console.log(i + '- ' + response.entities[i-1].entity);
+    console.log(i + "- " + response.entities[i-1].entity);
   }
-  if (typeof response.dialog !== 'undefined' && response.dialog !== null) {
-    console.log('Dialog Status: ' + response.dialog.status);
+  if (typeof response.dialog !== "undefined" && response.dialog !== null) {
+    console.log("Dialog Status: " + response.dialog.status);
     if(!response.dialog.isFinished()) {
-      console.log('Dialog Parameter Name: ' + response.dialog.parameterName);
-      console.log('Dialog Prompt: ' + response.dialog.prompt);
+      console.log("Dialog Parameter Name: " + response.dialog.parameterName);
+      console.log("Dialog Prompt: " + response.dialog.prompt);
     }
   }
-}
+};

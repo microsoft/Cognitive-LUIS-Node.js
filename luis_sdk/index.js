@@ -32,14 +32,18 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var https = require('https');
-var util = require('util');
-var LUISResponse = require('./luis_response');
+
+"use strict";
+
+var https = require("https");
+var util = require("util");
+var LUISResponse = require("./luis_response");
 
 /**
  * This is the interface of the LUIS SDK
  * Constructs a LUISClient with the corresponding user's App ID and Subscription Keys
  * Starts the prediction procedure for the user's text, and accepts a callback function
+ *
  * @param initData an object that has 4 propertes:
  * @1- appId a String containing the Application Id
  * @2- appKey a String containing the Subscription Key
@@ -53,18 +57,19 @@ var LUISClient = function(initData) {
   var appKey = initData.appKey;
   var preview = initData.preview;
   var verbose = initData.verbose;
-  validateAppInfoParam(appId, 'Application Id');
-  validateAppInfoParam(appKey, 'Subscription Key');
-  preview = validateBooleanParam(preview, 'Preview');
-  verbose = validateBooleanParam(verbose, 'Verbose');
-  const LUISURL = 'api.projectoxford.ai';
-  const LUISPreviewURL = preview ? '/preview' : '';
-  const LUISPredictMask = '/luis/v1/application%s?id=%s&subscription-key=%s%s&q=%s';
-  const LUISReplyMask = '/luis/v1/application%s?id=%s&subscription-key=%s&contextid=%s%s&q=%s';
-  const LUISVerboseURL = verbose ? '&verbose=true' : '';
+  validateAppInfoParam(appId, "Application Id");
+  validateAppInfoParam(appKey, "Subscription Key");
+  preview = validateBooleanParam(preview, "Preview");
+  verbose = validateBooleanParam(verbose, "Verbose");
+  const LUISURL = "api.projectoxford.ai";
+  const LUISPreviewURL = preview ? "/preview" : "";
+  const LUISPredictMask = "/luis/v1/application%s?id=%s&subscription-key=%s%s&q=%s";
+  const LUISReplyMask = "/luis/v1/application%s?id=%s&subscription-key=%s&contextid=%s%s&q=%s";
+  const LUISVerboseURL = verbose ? "&verbose=true" : "";
   return {
     /**
      * Initiates the prediction procedure
+     *
      * @param text a String containing the text which needs to be analysed and predicted
      * @param responseHandlers an object that contains "onSuccess" and "onFailure" functions to be executed
      * on the success or failure of the web request
@@ -80,6 +85,7 @@ var LUISClient = function(initData) {
     },
     /**
      * Initiates the prediction procedure
+     *
      * @param text a String containing the text which needs to be analysed and predicted
      * @param LUISresponse an object that contains the context ID of the dialog
      * @param responseHandlers an object that contains "onSuccess" and "onFailure" functions to be executed
@@ -88,7 +94,7 @@ var LUISClient = function(initData) {
     reply: function (text, LUISresponse, responseHandlers, forceSetParameterName) {
       //TODO: When the reply can be used in the published version this condition has to be removed
       if (!preview) {
-        throw new Error('Reply can only be used with the preview version');
+        throw new Error("Reply can only be used with the preview version");
       }
       text = validateText(text);
       validateLUISresponse(LUISresponse);
@@ -98,9 +104,9 @@ var LUISClient = function(initData) {
         path: util.format(LUISReplyMask, LUISPreviewURL, appId, appKey,
           LUISresponse.dialog.contextId, LUISVerboseURL, encodeURIComponent(text))
       };
-	  if(forceSetParameterName !== null && typeof forceSetParameterName === 'string'){
-	    LUISOptions.path += util.format('&forceset=%s',forceSetParameterName);
-	  }
+      if (forceSetParameterName !== null && typeof forceSetParameterName === "string") {
+        LUISOptions.path += util.format("&forceset=%s", forceSetParameterName);
+      }
       httpHelper(LUISOptions, responseHandlers);
     }
   };
@@ -109,137 +115,145 @@ var LUISClient = function(initData) {
 
 /**
  * Initiates the web request
+ *
  * @param LUISOptions a String containing the text which needs to be analysed and predicted
  * @param responseHandlers an object that contains "onSuccess" and "onFailure" functions to be executed
  * on the success or failure of the web request
  */
-var httpHelper = function(LUISOptions, responseHandlers){
+var httpHelper = function (LUISOptions, responseHandlers) {
   var req = https.request(LUISOptions, function (response) {
-    var JSONResponse = '';
-    response.on('data', function (chunk) {
-      JSONResponse += chunk;
+    var JsonResponse = "";
+    response.on("data", function (chunk) {
+      JsonResponse += chunk;
     });
-    response.on('end', function () {
-      LUISresponse = LUISResponse(JSONResponse);
+    response.on("end", function () {
+      var LUISresponse = LUISResponse(JsonResponse);
       responseHandlers.onSuccess(LUISresponse);
     });
   });
   req.end();
-  req.on('error', function (err) {
+  req.on("error", function (err) {
     responseHandlers.onFailure(err);
   });
 };
 
 /**
  * Validates initialization object of LUISClient
+ *
  * @param initData an object that has 4 propertes:
  * @1- appId a String containing the Application Id
  * @2- appKey a String containing the Subscription Key
  * @3- preview a Boolean to choose whether to use the preview version or not
  * @4- verbose a Boolean to choose whether to use the verbose version or not
  */
-var validateInitData = function(initData){
-  if (initData === null || typeof initData === 'undefined') {
-    throw Error('Null or undefined initialization data for LUISClient');
+var validateInitData = function (initData) {
+  if (initData === null || typeof initData === "undefined") {
+    throw new Error("Null or undefined initialization data for LUISClient");
   }
-  if(!initData.hasOwnProperty('appId')) {
-    throw Error('You have to provide an Application Id in the initialization data object');
+  if (!initData.hasOwnProperty("appId")) {
+    throw new Error("You have to provide an Application Id in the initialization data object");
   }
-  if(!initData.hasOwnProperty('appKey')) {
-    throw Error('You have to provide an Subscription Key in the initialization data object');
+  if (!initData.hasOwnProperty("appKey")) {
+    throw new Error("You have to provide an Subscription Key in the initialization data object");
   }
 };
 
 /**
  * Validates the App info parameters such as Application Id and SubscriptionKey
+ *
  * @param appInfoParam a String that represents an App info parameter
  * @param appInfoParamName a String containing the parameter's name
  */
-validateAppInfoParam = function (appInfoParam, appInfoParamName) {
+var validateAppInfoParam = function (appInfoParam, appInfoParamName) {
   validateStringParam(appInfoParam, appInfoParamName);
-  if (appInfoParam === '') {
-    throw Error('Empty ' + appInfoParamName);
+  if (appInfoParam === "") {
+    throw new Error("Empty " + appInfoParamName);
   }
-  if(appInfoParam.indexOf(' ') !== -1) {
-    throw Error('Invalid ' + appInfoParamName);
+  if (appInfoParam.indexOf(" ") !== -1) {
+    throw new Error("Invalid " + appInfoParamName);
   }
 };
 
 /**
  * Validates the text to predict
+ *
  * @param text a String containing the text which needs to be analysed and predicted
  * @returns a string containing the processed text to use for prediction
  */
 var validateText = function (text) {
-  validateStringParam(text,'Text to predict');
+  validateStringParam(text,"Text to predict");
   text = text.trim();
-  if (text === '') {
-    throw new Error('Empty text to predict');
+  if (text === "") {
+    throw new Error("Empty text to predict");
   }
   return text;
 };
 
 /**
  * Validates a string parameter
+ *
  * @param param a string that represents a parameter to a function
  * @param paramName the parameter's name
  */
-var validateStringParam = function(param, paramName) {
-  if (typeof param === 'undefined' || param === null) {
-    throw Error('Null or undefined ' + paramName);
+var validateStringParam = function (param, paramName) {
+  if (typeof param === "undefined" || param === null) {
+    throw new Error("Null or undefined " + paramName);
   }
-  if (typeof param !== 'string') {
-    throw Error(paramName + ' is not a string');
+  if (typeof param !== "string") {
+    throw new Error(paramName + " is not a string");
   }
 };
 
 /**
  * Validates a boolean parameter
+ *
  * @param param a boolean that represents a parameter to a function
  * @param paramName a String that represents the parameter's name
  */
-var validateBooleanParam = function(param, paramName){
-  if (typeof param === 'undefined' || param === null) {
+var validateBooleanParam = function (param, paramName) {
+  if (typeof param === "undefined" || param === null) {
     param = false;
   }
-  if(typeof param !== 'boolean') {
-    throw Error(paramName + ' flag is not boolean');
+  if (typeof param !== "boolean") {
+    throw new Error(paramName + " flag is not boolean");
   }
   return param;
 };
 
 /**
  * Validates the response handlers
+ *
  * @param responseHandlers an object that contains "onSuccess" and "onFailure" functions to be executed
  * on the success or failure of the web request
  */
 var validateResponseHandlers = function (responseHandlers) {
-  if(typeof responseHandlers === 'undefined' || responseHandlers === null) {
-    throw new Error('You have to provide a response handlers object ' +
-      'containing "onSuccess" and "onFailure" functions')
+  if (typeof responseHandlers === "undefined" || responseHandlers === null) {
+    throw new Error("You have to provide a response handlers object " +
+      "containing 'onSuccess' and 'onFailure' functions")
   }
-  if(!responseHandlers.hasOwnProperty('onSuccess') || typeof responseHandlers.onSuccess === 'undefined'
-    || responseHandlers.onSuccess === null || typeof responseHandlers.onSuccess !== 'function') {
-    throw new Error('You have to provide an "onSuccess" function as a property ' +
-      'of the response handlers object')
+  if (!responseHandlers.hasOwnProperty("onSuccess") || typeof responseHandlers.onSuccess === "undefined"
+    || responseHandlers.onSuccess === null || typeof responseHandlers.onSuccess !== "function") {
+    throw new Error("You have to provide an 'onSuccess' function as a property " +
+      "of the response handlers object")
   }
-  if(!responseHandlers.hasOwnProperty('onFailure') || typeof responseHandlers.onFailure === 'undefined'
-    || responseHandlers.onFailure === null || typeof responseHandlers.onFailure !== 'function') {
-    throw new Error('You have to provide an "onFailure" function as a property ' +
-      'of the response handlers object')
+  if (!responseHandlers.hasOwnProperty("onFailure") || typeof responseHandlers.onFailure === "undefined"
+    || responseHandlers.onFailure === null || typeof responseHandlers.onFailure !== "function") {
+    throw new Error("You have to provide an 'onFailure' function as a property " +
+      "of the response handlers object")
   }
 };
 
 /**
  * Validates the LUISresponse
+ *
  * @param LUISresponse an object that contains the context ID of the dialog
  */
 var validateLUISresponse = function (LUISresponse) {
-  if(typeof LUISresponse === 'undefined' || LUISresponse === null ||!LUISresponse.hasOwnProperty('dialog')
-    || typeof LUISresponse.dialog === 'undefined' || !LUISresponse.dialog.hasOwnProperty('contextId')
-    || typeof LUISresponse.dialog.contextId === 'undefined' || typeof LUISresponse.dialog.contextId !== 'string'){
-    throw Error('You have to provide a LUISResponse object containing the Context Id of the dialog' +
-      ' you\'re replying to');
+  if (typeof LUISresponse === "undefined" || LUISresponse === null || !LUISresponse.hasOwnProperty("dialog")
+    || typeof LUISresponse.dialog === "undefined" || !LUISresponse.dialog.hasOwnProperty("contextId")
+    || typeof LUISresponse.dialog.contextId === "undefined" || typeof LUISresponse.dialog.contextId !== "string") {
+    throw new Error("You have to provide a LUISResponse object containing the Context Id of the dialog" +
+      " you're replying to");
   }
 };
 
