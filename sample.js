@@ -43,7 +43,6 @@ const APPKEY = "Enter your Subscription Key here";
 var LUISclient = LUISClient({
   appId: APPID,
   appKey: APPKEY,
-  preview: true,
   verbose: true
 });
 

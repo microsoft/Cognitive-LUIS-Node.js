@@ -44,28 +44,24 @@ var LUISResponse = require("./luis_response");
  * Constructs a LUISClient with the corresponding user's App ID and Subscription Keys
  * Starts the prediction procedure for the user's text, and accepts a callback function
  *
- * @param initData an object that has 4 propertes:
+ * @param initData an object that has 3 propertes:
  * @1- appId a String containing the Application Id
  * @2- appKey a String containing the Subscription Key
- * @3- preview a Boolean to choose whether to use the preview version or not
- * @4- verbose a Boolean to choose whether to use the verbose version or not
+ * @3- verbose a Boolean to choose whether to use the verbose version or not
  * @returns {{predict: predict, reply: reply}} an object containing the functions that need to be used
  */
 var LUISClient = function(initData) {
   validateInitData(initData);
   var appId = initData.appId;
   var appKey = initData.appKey;
-  var preview = initData.preview;
   var verbose = initData.verbose;
   validateAppInfoParam(appId, "Application Id");
   validateAppInfoParam(appKey, "Subscription Key");
-  preview = validateBooleanParam(preview, "Preview");
   verbose = validateBooleanParam(verbose, "Verbose");
   const LUISURL = "api.projectoxford.ai";
-  const LUISPreviewURL = preview ? "/preview" : "";
-  const LUISPredictMask = "/luis/v1/application%s?id=%s&subscription-key=%s%s&q=%s";
-  const LUISReplyMask = "/luis/v1/application%s?id=%s&subscription-key=%s&contextid=%s%s&q=%s";
-  const LUISVerboseURL = verbose ? "&verbose=true" : "";
+  const LUISPredictMask = "/luis/v2.0/apps/%s?subscription-key=%s&q=%s&verbose=%s";
+  const LUISReplyMask = "/luis/v2.0/apps/%s?subscription-key=%s&q=%s&contextid=%s&verbose=%s";
+  const LUISVerbose = verbose ? "true" : "false";
   return {
     /**
      * Initiates the prediction procedure
@@ -79,7 +75,7 @@ var LUISClient = function(initData) {
       validateResponseHandlers(responseHandlers);
       var LUISOptions = {
         hostname: LUISURL,
-        path: util.format(LUISPredictMask, LUISPreviewURL, appId, appKey, LUISVerboseURL, encodeURIComponent(text))
+        path: util.format(LUISPredictMask, appId, appKey, encodeURIComponent(text), LUISVerbose)
       };
       httpHelper(LUISOptions, responseHandlers);
     },
@@ -92,17 +88,13 @@ var LUISClient = function(initData) {
      * on the success or failure of the web request
      */
     reply: function (text, LUISresponse, responseHandlers, forceSetParameterName) {
-      //TODO: When the reply can be used in the published version this condition has to be removed
-      if (!preview) {
-        throw new Error("Reply can only be used with the preview version");
-      }
       text = validateText(text);
       validateLUISresponse(LUISresponse);
       validateResponseHandlers(responseHandlers);
       var LUISOptions = {
         hostname: LUISURL,
-        path: util.format(LUISReplyMask, LUISPreviewURL, appId, appKey,
-          LUISresponse.dialog.contextId, LUISVerboseURL, encodeURIComponent(text))
+        path: util.format(LUISReplyMask, appId, appKey, encodeURIComponent(text),
+          LUISresponse.dialog.contextId, LUISVerbose)
       };
       if (forceSetParameterName !== null && typeof forceSetParameterName === "string") {
         LUISOptions.path += util.format("&forceset=%s", forceSetParameterName);
@@ -143,8 +135,7 @@ var httpHelper = function (LUISOptions, responseHandlers) {
  * @param initData an object that has 4 propertes:
  * @1- appId a String containing the Application Id
  * @2- appKey a String containing the Subscription Key
- * @3- preview a Boolean to choose whether to use the preview version or not
- * @4- verbose a Boolean to choose whether to use the verbose version or not
+ * @3- verbose a Boolean to choose whether to use the verbose version or not
  */
 var validateInitData = function (initData) {
   if (initData === null || typeof initData === "undefined") {
@@ -212,7 +203,7 @@ var validateStringParam = function (param, paramName) {
  */
 var validateBooleanParam = function (param, paramName) {
   if (typeof param === "undefined" || param === null) {
-    param = false;
+    param = true;
   }
   if (typeof param !== "boolean") {
     throw new Error(paramName + " flag is not boolean");

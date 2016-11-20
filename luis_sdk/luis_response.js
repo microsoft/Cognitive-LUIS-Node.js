@@ -48,13 +48,6 @@ module.exports = function (JsonResponse) {
   if (LUISresponse.hasOwnProperty("statusCode")) {
     throw new Error("Invalid Subscription Key");
   }
-  if (LUISresponse.hasOwnProperty("topScoringIntent") && LUISresponse.topScoringIntent !== null
-    && typeof LUISresponse.topScoringIntent !== "undefined") {
-    LUISresponse.intents = [LUISresponse.topScoringIntent];
-  } else if (LUISresponse.hasOwnProperty("intents") && LUISresponse.intents !== null
-    && typeof LUISresponse.intents !== "undefined" && LUISresponse.intents.length > 0) {
-    LUISresponse.topScoringIntent = LUISresponse.intents[0];
-  }
   if (LUISresponse.hasOwnProperty("dialog") && typeof LUISresponse.dialog !== "undefined") {
     LUISresponse.dialog.isFinished = function () {
       return this.status === "Finished";
