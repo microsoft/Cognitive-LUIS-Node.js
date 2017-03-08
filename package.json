@@ -1,0 +1,37 @@
+{
+  "name": "LUISSDK",
+  "version": "1.0.0",
+  "description": "LUIS SDK for Node.js",
+  "author": "t-ahelhi@microsoft.com",
+  "homepage": "https://www.luis.ai/",
+  "license": "MIT",
+  "main": "index.js",
+  "engines": {
+    "node": "6.10.0"
+  },
+  "scripts": {
+    "pretest": "standard",
+    "test": "tape test/**/*.js | tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/Cognitive-LUIS-Node.js"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/Cognitive-LUIS-Node.js/issues"
+  },
+  "keywords": [
+    "LUIS",
+    "Microsoft-Cognitive",
+    "Language Understanding Intelligent Service"
+  ],
+  "dependencies": {
+    "concat-stream": "1.6.0"
+  },
+  "devDependencies": {
+    "nock": "9.0.9",
+    "standard": "9.0.1",
+    "tap-spec": "4.1.1",
+    "tape": "4.6.3"
+  }
+}
