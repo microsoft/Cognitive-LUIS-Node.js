@@ -1,6 +1,6 @@
 {
   "name": "LUISSDK",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "LUIS SDK for Node.js",
   "author": "t-ahelhi@microsoft.com",
   "homepage": "https://www.luis.ai/",

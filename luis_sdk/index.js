@@ -55,13 +55,15 @@ var LUISClient = function(initData) {
   var appId = initData.appId;
   var appKey = initData.appKey;
   var verbose = initData.verbose;
+  var staging = initData.staging;
   validateAppInfoParam(appId, "Application Id");
   validateAppInfoParam(appKey, "Subscription Key");
   verbose = validateBooleanParam(verbose, "Verbose");
-  const LUISURL = "api.projectoxford.ai";
-  const LUISPredictMask = "/luis/v2.0/apps/%s?subscription-key=%s&q=%s&verbose=%s";
-  const LUISReplyMask = "/luis/v2.0/apps/%s?subscription-key=%s&q=%s&contextid=%s&verbose=%s";
+  const LUISURL = initData.domain;
+  const LUISPredictMask = "/luis/v2.0/apps/%s?subscription-key=%s&q=%s&verbose=%s&staging=%s";
+  const LUISReplyMask = "/luis/v2.0/apps/%s?subscription-key=%s&q=%s&contextid=%s&verbose=%s&staging=%s";
   const LUISVerbose = verbose ? "true" : "false";
+  const LUISStaging = staging ? "true" : "false";
   return {
     /**
      * Initiates the prediction procedure
@@ -75,7 +77,7 @@ var LUISClient = function(initData) {
       validateResponseHandlers(responseHandlers);
       var LUISOptions = {
         hostname: LUISURL,
-        path: util.format(LUISPredictMask, appId, appKey, encodeURIComponent(text), LUISVerbose)
+        path: util.format(LUISPredictMask, appId, appKey, encodeURIComponent(text), LUISVerbose, LUISStaging)
       };
       httpHelper(LUISOptions, responseHandlers);
     },
@@ -94,7 +96,7 @@ var LUISClient = function(initData) {
       var LUISOptions = {
         hostname: LUISURL,
         path: util.format(LUISReplyMask, appId, appKey, encodeURIComponent(text),
-          LUISresponse.dialog.contextId, LUISVerbose)
+          LUISresponse.dialog.contextId, LUISVerbose, LUISStaging)
       };
       if (forceSetParameterName !== null && typeof forceSetParameterName === "string") {
         LUISOptions.path += util.format("&forceset=%s", forceSetParameterName);
