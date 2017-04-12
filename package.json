@@ -29,8 +29,8 @@
     "concat-stream": "1.6.0"
   },
   "devDependencies": {
-    "nock": "9.0.9",
-    "standard": "9.0.1",
+    "nock": "9.0.13",
+    "standard": "10.0.1",
     "tap-spec": "4.1.1",
     "tape": "4.6.3"
   }
