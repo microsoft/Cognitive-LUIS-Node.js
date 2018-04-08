@@ -48,7 +48,7 @@ var LUISResponse = require("./luis_response");
  * @1- appId a String containing the Application Id
  * @2- appKey a String containing the Subscription Key
  * @3- verbose a Boolean to choose whether to use the verbose version or not
- * @returns {{predict: predict, reply: reply}} an object containing the functions that need to be used
+ * @returns {{predict: predict, reply: reply, changeConfig: changeConfig}} an object containing the functions that need to be used
  */
 var LUISClient = function(initData) {
   validateInitData(initData);
@@ -100,6 +100,23 @@ var LUISClient = function(initData) {
         LUISOptions.path += util.format("&forceset=%s", forceSetParameterName);
       }
       httpHelper(LUISOptions, responseHandlers);
+    },
+    /**
+     * Changes the LUIS configuration for dynamic workspaces
+     * 
+     * @param newConfig an Object that has three properties:
+     * @1- appId a String containing the Application Id
+     * @2- appKey a String containing the Subscription Key
+     * @3- verbose a Boolean to choose whether to use the verbose version or not
+     */
+    changeConfig: function(newConfig){
+      validateInitData(newConfig);
+      appId = newConfig.appId;
+      appKey = newConfig.appKey;
+      verbose = newConfig.verbose;
+      validateAppInfoParam(appId, "Application Id");
+      validateAppInfoParam(appKey, "Subscription Key");
+      verbose = validateBooleanParam(verbose, "Verbose");
     }
   };
 };
