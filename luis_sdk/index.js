@@ -104,18 +104,19 @@ var LUISClient = function(initData) {
     /**
      * Changes the LUIS configuration for dynamic workspaces
      * 
-     * @param newConfig an Object containing the new configuration
+     * @param newConfig an Object that has three properties:
+     * @1- appId a String containing the Application Id
+     * @2- appKey a String containing the Subscription Key
+     * @3- verbose a Boolean to choose whether to use the verbose version or not
      */
     changeConfig: function(newConfig){
-      if(newConfig.hasOwnProperty("appId")){
-        appId = newConfig.appId;
-      }
-      if(newConfig.hasOwnProperty("appKey")){
-        appKey = newConfig.appKey;
-      }
-      if(newConfig.hasOwnProperty("verbose")){
-        verbose = newConfig.verbose;
-      }
+      validateInitData(newConfig);
+      appId = newConfig.appId;
+      appKey = newConfig.appKey;
+      verbose = newConfig.verbose;
+      validateAppInfoParam(appId, "Application Id");
+      validateAppInfoParam(appKey, "Subscription Key");
+      verbose = validateBooleanParam(verbose, "Verbose");
     }
   };
 };
